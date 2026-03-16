@@ -22,6 +22,9 @@ rl-gym/
 │   ├── double_dqn.py       # Double DQN，解耦动作选择与价值评估
 │   ├── dueling_dqn.py      # Dueling DQN，V(s)+A(s,a) 网络分解
 │   └── THEORY.md           # Q 值高估证明 + 三代算法演进理论
+├── pong/
+│   ├── dqn_cnn.py          # CNN DQN，完整 Atari 图像预处理管道
+│   └── THEORY.md           # 图像 MDP 理论 + CNN 结构分析
 ├── pyproject.toml
 ├── uv.lock
 └── .python-version
@@ -66,6 +69,28 @@ rl-gym/
 | **Dueling DQN** | **V(s)+A(s,a) 分解，提升 V 的学习效率** | **208.6** | **已解决** |
 
 > 三代算法的演进理论见 [lunarlander/THEORY.md](./lunarlander/THEORY.md)。
+
+## ALE/Pong-v5
+
+Atari Pong，图像像素作为输入。与前三个游戏最大的区别：**状态不再是低维向量，而是 $(210, 160, 3)$ 的 RGB 图像**，需要 CNN 提取特征。
+
+图像输入带来的核心问题：单帧图像不满足 Markov 性质（无法判断球的运动方向）。
+
+| 算法 | 关键技术 | 备注 |
+|------|---------|------|
+| **CNN DQN** | 帧堆叠 4 帧 + 图像预处理 + Double DQN 目标 | 原论文 5000 万步，本实现 50 万步（基本策略）|
+
+图像预处理管道：灰度化 → 裁剪比分栏 → 缩放 84×84 → 归一化 → 帧堆叠 4 帧
+
+网络结构（Mnih et al., 2015）：$4 \times 84 \times 84 \xrightarrow{\text{Conv}\times 3} \xrightarrow{\text{FC}(512)} Q \in \mathbb{R}^6$，参数量 1.7M
+
+> 算法理论（Markov 性质、CNN 感受野、奖励裁剪等）见 [pong/THEORY.md](./pong/THEORY.md)。
+
+```
+pong/
+├── dqn_cnn.py   # CNN DQN，完整 Atari 预处理管道
+└── THEORY.md    # 图像 MDP 理论 + 预处理必要性分析
+```
 
 ## 快速上手
 
