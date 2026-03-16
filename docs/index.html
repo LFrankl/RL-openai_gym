@@ -381,6 +381,76 @@
     footer a { color: var(--muted); }
     footer a:hover { color: var(--text); }
 
+    /* ======= 可展开推导 ======= */
+    .theory-card details { margin-top: 12px; }
+
+    .theory-card summary {
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; list-style: none;
+      padding: 8px 12px;
+      background: var(--bg3); border-radius: 6px;
+      font-size: 13px; font-weight: 500; color: var(--accent);
+      user-select: none;
+      transition: background .15s;
+    }
+    .theory-card summary::-webkit-details-marker { display: none; }
+    .theory-card summary:hover { background: rgba(88,166,255,.1); }
+
+    .theory-card summary .toggle-icon {
+      font-size: 11px; color: var(--muted);
+      transition: transform .25s;
+    }
+    .theory-card details[open] summary .toggle-icon { transform: rotate(180deg); }
+    .theory-card details[open] summary { border-radius: 6px 6px 0 0; }
+
+    .derivation {
+      background: var(--bg3);
+      border-radius: 0 0 6px 6px;
+      padding: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .derivation h5 {
+      font-size: 12px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .6px; color: var(--muted);
+      margin: 20px 0 8px;
+    }
+    .derivation h5:first-child { margin-top: 0; }
+
+    .derivation p { font-size: 13px; color: var(--muted); line-height: 1.75; margin-bottom: 8px; }
+    .derivation p:last-child { margin-bottom: 0; }
+
+    .derivation .math-block {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      margin: 10px 0;
+    }
+
+    .derivation .step {
+      display: flex; gap: 12px; margin: 10px 0;
+      align-items: flex-start;
+    }
+    .derivation .step-num {
+      flex-shrink: 0;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: rgba(88,166,255,.15); color: var(--accent);
+      font-size: 11px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      margin-top: 2px;
+    }
+    .derivation .step-body { flex: 1; font-size: 13px; color: var(--muted); }
+
+    .derivation .theorem-box {
+      background: rgba(63,185,80,.06);
+      border: 1px solid rgba(63,185,80,.25);
+      border-radius: 6px; padding: 12px 16px;
+      font-size: 13px; margin: 10px 0;
+    }
+    .derivation .theorem-box strong { color: var(--green); }
+
+    /* theory 区改为单列，给推导足够宽度 */
+    #theory .theory-grid { grid-template-columns: 1fr; }
+
     /* ======= 工具类 ======= */
     .section-label {
       font-size: 12px; font-weight: 600; text-transform: uppercase;
@@ -673,86 +743,390 @@
   <div class="container">
     <div class="section-label">理论基础</div>
     <h2 class="section-title">核心数学推导</h2>
-    <p class="section-desc">每个算法背后的严格理论——Bellman 方程、策略梯度定理、GAE 推导。</p>
+    <p class="section-desc">点击「展开完整推导」查看每个算法的严格数学推导——从定义出发，一步步到结论。</p>
 
     <div class="theory-grid">
 
-      <!-- Bellman -->
+      <!-- ① Bellman 最优方程 -->
       <div class="theory-card">
-        <h4>Bellman 最优方程 <span class="tag">Q-Learning / DQN</span></h4>
+        <h4>① Bellman 最优方程 <span class="tag">Q-Learning / DQN</span></h4>
         <div class="math-block">
           $$Q^*(s, a) = \mathbb{E}_{s'}\!\left[R(s,a) + \gamma \max_{a'} Q^*(s', a')\right]$$
         </div>
-        <p>
-          这是一个不动点方程。Bellman 算子 $\mathcal{T}$ 是关于 $\sup$-范数的
-          $\gamma$-收缩映射，由 Banach 不动点定理保证唯一解。
-          Q-Learning 以随机近似的方式逐步逼近该不动点。
-        </p>
+        <p>这是 Q-Learning 和 DQN 的理论基础。Bellman 算子是 $\gamma$-收缩映射，由 Banach 不动点定理保证唯一解。</p>
+
+        <details>
+          <summary>展开完整推导 <span class="toggle-icon">▼</span></summary>
+          <div class="derivation">
+
+            <h5>1. 动作价值函数定义</h5>
+            <p>给定策略 $\pi$，定义动作价值函数为从状态 $s$ 执行动作 $a$ 后，遵循 $\pi$ 的期望累计折扣回报：</p>
+            <div class="math-block">$$Q^\pi(s, a) = \mathbb{E}_\pi\!\left[\sum_{t=0}^{\infty} \gamma^t R(s_t, a_t)\,\Big|\,s_0=s,\,a_0=a\right]$$</div>
+
+            <h5>2. 递推展开（Bellman 期望方程）</h5>
+            <p>将求和拆出第一步，利用 MDP 的 Markov 性质：</p>
+            <div class="math-block">
+              $$Q^\pi(s, a) = \mathbb{E}_{s'}\!\left[R(s,a) + \gamma \sum_{a'}\pi(a'|s')\,Q^\pi(s', a')\right]$$
+            </div>
+            <p>这就是 <strong>Bellman 期望方程</strong>，它将 $Q^\pi$ 对自身的递推关系显式化。</p>
+
+            <h5>3. 最优 Q 函数与 Bellman 最优方程</h5>
+            <p>对所有策略取上确界，定义最优动作价值函数 $Q^*(s,a) = \sup_\pi Q^\pi(s,a)$。
+            最优策略总是贪心地选择最大 Q 值的动作，故：</p>
+            <div class="math-block">
+              $$Q^*(s, a) = \mathbb{E}_{s'}\!\left[R(s,a) + \gamma \max_{a'} Q^*(s', a')\right]$$
+            </div>
+
+            <h5>4. Bellman 算子是 γ-收缩映射（证明唯一解）</h5>
+            <p>定义 Bellman 最优算子 $\mathcal{T}$：$(\mathcal{T}Q)(s,a) = \mathbb{E}_{s'}[R + \gamma\max_{a'}Q(s',a')]$</p>
+            <p>对任意两个 Q 函数 $Q_1, Q_2$，利用 $|\max f - \max g| \leq \max|f-g|$：</p>
+            <div class="math-block">
+              $$\|\mathcal{T}Q_1 - \mathcal{T}Q_2\|_\infty \leq \gamma\,\|Q_1 - Q_2\|_\infty$$
+            </div>
+            <p>因为 $\gamma \in [0,1)$，$\mathcal{T}$ 是完备度量空间 $(\mathcal{B}(\mathcal{S}\times\mathcal{A}), \|\cdot\|_\infty)$ 上的<strong>压缩映射</strong>。
+            由 <strong>Banach 不动点定理</strong>，$Q^*$ 是 $\mathcal{T}$ 的唯一不动点，且从任意初始 $Q_0$ 出发，迭代 $Q_{k+1}=\mathcal{T}Q_k$ 以几何速率收敛：</p>
+            <div class="math-block">$$\|Q_k - Q^*\|_\infty \leq \gamma^k\,\|Q_0 - Q^*\|_\infty$$</div>
+
+            <h5>5. Q-Learning 更新规则</h5>
+            <p>Q-Learning 以<strong>随机近似（Stochastic Approximation）</strong>的方式实现上述迭代，
+            用单样本 $(s_t, a_t, r_t, s_{t+1})$ 估计期望：</p>
+            <div class="math-block">
+              $$Q(s_t, a_t) \leftarrow Q(s_t, a_t) + \alpha\,\underbrace{\Big[r_t + \gamma\max_{a'}Q(s_{t+1},a') - Q(s_t,a_t)\Big]}_{\text{TD 误差 }\delta_t}$$
+            </div>
+            <p>方括号内称为 <strong>TD 误差</strong>（Temporal Difference Error），是不动点方程残差的单样本估计。</p>
+
+          </div>
+        </details>
       </div>
 
-      <!-- TD Error -->
+      <!-- ② Q-Learning 收敛定理 -->
       <div class="theory-card">
-        <h4>TD 误差与收敛性 <span class="tag">Q-Learning</span></h4>
+        <h4>② Q-Learning 收敛定理 <span class="tag">Q-Learning</span></h4>
         <div class="math-block">
-          $$\delta_t = r_t + \gamma \max_{a'} Q(s_{t+1}, a') - Q(s_t, a_t)$$
+          $$\delta_t = r_t + \gamma \max_{a'} Q(s_{t+1}, a') - Q(s_t, a_t) \;\xrightarrow{t\to\infty}\; 0$$
         </div>
-        <p>
-          Watkins &amp; Dayan (1992) 证明：在所有状态-动作对被无限次访问，
-          且学习率满足 Robbins-Monro 条件（$\sum \alpha_t = \infty$，$\sum \alpha_t^2 &lt; \infty$）
-          时，Q-Learning 以概率 1 收敛到 $Q^*$。
-        </p>
+        <p>Watkins &amp; Dayan (1992) 证明在三个条件下，Q-Learning 以概率 1 收敛到 $Q^*$。</p>
+
+        <details>
+          <summary>展开完整推导 <span class="toggle-icon">▼</span></summary>
+          <div class="derivation">
+
+            <h5>收敛定理（Watkins &amp; Dayan, 1992）</h5>
+            <div class="theorem-box">
+              <strong>定理：</strong>若满足以下三个条件，Q-Learning 以概率 1 收敛到 $Q^*$：
+              <div class="math-block" style="margin-top:10px;">
+                $$\text{(i)}\;\sum_t \mathbf{1}[(s_t,a_t)=(s,a)] = \infty \quad \forall s,a$$
+                $$\text{(ii)}\;\sum_t \alpha_t(s,a) = \infty,\quad \sum_t \alpha_t^2(s,a) &lt; \infty$$
+                $$\text{(iii)}\;\sup_{s,a,t}|R(s,a)| &lt; \infty$$
+              </div>
+            </div>
+
+            <h5>条件解读</h5>
+            <div class="step">
+              <div class="step-num">i</div>
+              <div class="step-body"><strong>充分探索</strong>：每个状态-动作对必须被无限次访问。实践中通过 $\varepsilon$-greedy 保证，$\varepsilon$ 需满足 $\sum_t \varepsilon_t = \infty$。若某对 $(s,a)$ 访问次数有限，对应的 Q 值将冻结在错误估计上。</div>
+            </div>
+            <div class="step">
+              <div class="step-num">ii</div>
+              <div class="step-body"><strong>Robbins-Monro 条件</strong>：学习率需足够大（$\sum \alpha_t = \infty$，保证能克服初始误差）但又足够小（$\sum \alpha_t^2 &lt; \infty$，保证噪声累计有界）。例如 $\alpha_t = 1/t$ 满足，常数学习率 $\alpha = 0.1$ 不满足——实践中仍常用常数学习率。</div>
+            </div>
+            <div class="step">
+              <div class="step-num">iii</div>
+              <div class="step-body"><strong>奖励有界</strong>：保证 TD 目标有界，使随机近似的方差可控。</div>
+            </div>
+
+            <h5>证明思路（随机逼近框架）</h5>
+            <p>将 Q-Learning 写成随机逼近的标准形式：</p>
+            <div class="math-block">$$Q_{t+1}(s,a) = (1-\alpha_t)Q_t(s,a) + \alpha_t\big[r_t + \gamma\max_{a'}Q_t(s_{t+1},a')\big]$$</div>
+            <p>定义误差 $\Delta_t(s,a) = Q_t(s,a) - Q^*(s,a)$，代入后利用 Bellman 算子的收缩性：</p>
+            <div class="math-block">$$\|\Delta_{t+1}\|_\infty \leq (1-\alpha_t)\|\Delta_t\|_\infty + \alpha_t\gamma\|\Delta_t\|_\infty + \alpha_t\xi_t$$</div>
+            <p>其中 $\xi_t$ 为随机噪声项。由 Robbins-Monro 条件和 $\gamma &lt; 1$，可验证 $\|\Delta_t\|_\infty \to 0$ a.s.。</p>
+
+            <h5>维数灾难（表格法的局限）</h5>
+            <p>Q-Table 大小为 $|\mathcal{S}| \times |\mathcal{A}|$。将连续状态空间每维分 $b$ 个桶、共 $d$ 维，则表格大小为 $b^d$。CartPole 的 4 维状态，每维 10 个桶，需要 $10^4 = 10000$ 格，尚可接受；更高维任务则指数爆炸，这正是 DQN 用神经网络替换 Q-Table 的动机。</p>
+
+          </div>
+        </details>
       </div>
 
-      <!-- GAE -->
+      <!-- ③ DQN 经验回放与目标网络 -->
       <div class="theory-card">
-        <h4>广义优势估计 GAE <span class="tag">PPO</span></h4>
+        <h4>③ DQN：经验回放 + 目标网络 <span class="tag">DQN</span></h4>
         <div class="math-block">
-          $$\hat{A}_t^{\text{GAE}(\gamma,\lambda)} = \sum_{l=0}^{\infty}(\gamma\lambda)^l \delta_{t+l}$$
+          $$\mathcal{L}(\theta) = \mathbb{E}_{(s,a,r,s')\sim\mathcal{D}}\!\left[\left(r + \gamma\max_{a'}Q_{\bar\theta}(s',a') - Q_\theta(s,a)\right)^2\right]$$
         </div>
-        <p>
-          以 $\lambda$ 在单步 TD（高偏差低方差）与蒙特卡洛（低偏差高方差）之间做插值。
-          $\lambda=0$ 退化为 TD(0)，$\lambda=1$ 退化为蒙特卡洛，
-          有效折扣因子变为 $\gamma\lambda$。
-        </p>
+        <p>DQN 用神经网络 $Q_\theta$ 代替 Q-Table，引入经验回放缓冲区 $\mathcal{D}$ 和固定的目标网络 $Q_{\bar\theta}$ 解决训练不稳定问题。</p>
+
+        <details>
+          <summary>展开完整推导 <span class="toggle-icon">▼</span></summary>
+          <div class="derivation">
+
+            <h5>问题 1：在线学习的样本相关性</h5>
+            <p>在线 RL 中，连续采集的样本 $(s_t, a_t, r_t, s_{t+1})$ 具有强时间相关性：$s_{t+1}$ 由 $s_t$ 确定性转移而来。
+            SGD 假设训练样本 i.i.d.，相关样本会导致梯度估计有偏，参数在局部震荡而非全局收敛。</p>
+
+            <h5>解决方案 1：经验回放（Experience Replay）</h5>
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-body">维护固定大小的缓冲区 $\mathcal{D}$（通常 $10^5$–$10^6$ 条），存储历史转移 $(s,a,r,s')$。</div>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-body">每次更新从 $\mathcal{D}$ 中均匀随机采样 mini-batch $B$，破坏时间相关性，使样本近似 i.i.d.。</div>
+            </div>
+            <div class="step">
+              <div class="step-num">3</div>
+              <div class="step-body">每条经验可被多次复用（off-policy），大幅提升样本效率。</div>
+            </div>
+
+            <h5>问题 2：移动靶（Moving Target）</h5>
+            <p>若用同一网络 $Q_\theta$ 同时计算当前值和 TD 目标，则：</p>
+            <div class="math-block">$$\text{目标} = r + \gamma\max_{a'}Q_\theta(s',a')$$</div>
+            <p>每次参数 $\theta$ 更新，TD 目标也随之变化，形成"追着移动靶射击"的局面。梯度方向不稳定，训练容易发散。</p>
+
+            <h5>解决方案 2：目标网络（Target Network）</h5>
+            <p>引入独立的目标网络 $Q_{\bar\theta}$，其参数 $\bar\theta$ 每隔 $C$ 步才从 $\theta$ 同步一次，
+            在两次同步之间 TD 目标完全固定：</p>
+            <div class="math-block">$$y_t = r_t + \gamma\max_{a'}Q_{\bar\theta}(s_{t+1},a'), \quad \bar\theta \leftarrow \theta \text{ 每 }C\text{ 步}$$</div>
+            <p>目标固定后，网络只需最小化普通的均方误差，梯度方向稳定，训练过程类似监督学习。</p>
+
+            <h5>致命三角（Deadly Triad）</h5>
+            <p>Sutton &amp; Barto 指出，以下三者同时存在时，Q 值有可能无界发散：</p>
+            <div class="math-block">$$\underbrace{\text{函数逼近}}_{\text{神经网络}} + \underbrace{\text{自举（Bootstrap）}}_{\text{TD 目标依赖自身}} + \underbrace{\text{离策略学习}}_{\text{经验回放}}$$</div>
+            <p>经验回放和目标网络从工程上大幅缓解了这一问题，但<strong>无法从理论上保证收敛</strong>。
+            这是 DQN 与 Q-Learning 收敛性的根本差异。</p>
+
+          </div>
+        </details>
       </div>
 
-      <!-- PPO Clip -->
+      <!-- ④ GAE -->
       <div class="theory-card">
-        <h4>PPO Clip 目标 <span class="tag">PPO</span></h4>
+        <h4>④ 广义优势估计 GAE <span class="tag">PPO</span></h4>
         <div class="math-block">
-          $$L^{\text{CLIP}} = \mathbb{E}_t\!\left[\min\!\left(r_t A_t,\ \text{clip}(r_t, 1{\pm}\epsilon) A_t\right)\right]$$
+          $$\hat{A}_t^{\text{GAE}(\gamma,\lambda)} = \sum_{l=0}^{\infty}(\gamma\lambda)^l \delta_{t+l}, \quad \delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)$$
         </div>
-        <p>
-          其中 $r_t = \pi_\theta / \pi_{\theta_{\text{old}}}$ 为概率比。
-          取 min 保证目标是悲观下界（pessimistic bound），
-          Clip 操作近似 TRPO 的 KL 约束，用一阶优化代替二阶 Fisher 矩阵。
-        </p>
+        <p>GAE 以参数 $\lambda$ 在偏差和方差之间做连续插值，兼顾单步 TD 的低方差和蒙特卡洛的低偏差。</p>
+
+        <details>
+          <summary>展开完整推导 <span class="toggle-icon">▼</span></summary>
+          <div class="derivation">
+
+            <h5>1. 优势函数</h5>
+            <p>优势函数 $A^\pi(s,a) = Q^\pi(s,a) - V^\pi(s)$ 衡量动作 $a$ 相对于平均水平的优劣。
+            用 $A$ 代替 $Q$ 作为策略梯度的权重，在不改变梯度期望的前提下降低方差（基线减方差技巧）。</p>
+
+            <h5>2. $k$-步回报估计量</h5>
+            <p>定义 $k$ 步 TD 误差：$\delta_t^{(k)} = \sum_{l=0}^{k-1}\gamma^l r_{t+l} + \gamma^k V(s_{t+k}) - V(s_t)$</p>
+            <p>不同 $k$ 的估计量在偏差-方差上存在权衡：</p>
+            <div class="math-block">
+              $$\hat{A}_t^{(1)} = \delta_t = r_t + \gamma V(s_{t+1}) - V(s_t) \quad\text{（高偏差，低方差）}$$
+              $$\hat{A}_t^{(\infty)} = \sum_{l=0}^{\infty}\gamma^l r_{t+l} - V(s_t) \quad\text{（低偏差，高方差）}$$
+            </div>
+
+            <h5>3. GAE 推导</h5>
+            <p>GAE 对所有 $k$ 步估计量做指数加权平均，权重为 $(\lambda)^{k-1}(1-\lambda)$（几何分布）：</p>
+            <div class="math-block">
+              $$\hat{A}_t^{\text{GAE}} = (1-\lambda)\sum_{k=1}^{\infty}\lambda^{k-1}\hat{A}_t^{(k)}$$
+            </div>
+            <p>展开后代入 $\hat{A}_t^{(k)}$ 的递推关系，化简得到等价的简洁形式：</p>
+            <div class="math-block">
+              $$\hat{A}_t^{\text{GAE}(\gamma,\lambda)} = \sum_{l=0}^{\infty}(\gamma\lambda)^l\,\delta_{t+l}$$
+            </div>
+            <p>其中每个 $\delta_{t+l} = r_{t+l} + \gamma V(s_{t+l+1}) - V(s_{t+l})$ 是单步 TD 误差。</p>
+
+            <h5>4. 极端情况与偏差-方差解释</h5>
+            <div class="math-block">
+              $$\lambda = 0:\quad \hat{A}_t = \delta_t \quad\text{（TD(0)，最高偏差，最低方差）}$$
+              $$\lambda = 1:\quad \hat{A}_t = \sum_{l=0}^{\infty}\gamma^l\delta_{t+l} = \hat{A}_t^{(\infty)} \quad\text{（MC，最低偏差，最高方差）}$$
+            </div>
+            <p>GAE 相当于将有效折扣因子从 $\gamma$ 变为 $\gamma\lambda$：$\lambda$ 越小，对远期奖励的依赖越少，方差越低但偏差越高。实践中 $\lambda = 0.95$ 是常用默认值。</p>
+
+          </div>
+        </details>
       </div>
 
-      <!-- Dueling -->
+      <!-- ⑤ PPO Clip -->
       <div class="theory-card">
-        <h4>Dueling 网络分解 <span class="tag">Dueling DQN</span></h4>
+        <h4>⑤ PPO Clip 目标函数 <span class="tag">PPO</span></h4>
         <div class="math-block">
-          $$Q(s,a;\theta,\alpha,\beta) = V(s;\theta,\beta) + \left(A(s,a;\theta,\alpha) - \frac{1}{|\mathcal{A}|}\sum_{a'}A(s,a')\right)$$
+          $$L^{\text{CLIP}}(\theta) = \mathbb{E}_t\!\left[\min\!\left(r_t(\theta)\,A_t,\ \text{clip}(r_t(\theta),\,1{-}\epsilon,\,1{+}\epsilon)\,A_t\right)\right]$$
         </div>
-        <p>
-          将 Q 值分解为状态价值 $V(s)$ 和优势函数 $A(s,a)$。
-          减去均值消除不可识别性，使 $V(s)$ 和 $A(s,a)$ 的学习信号相互独立，
-          在无需改变动作的状态上更高效地更新 $V$。
-        </p>
+        <p>PPO 是 TRPO 的一阶近似，用 Clip 操作代替 KL 散度约束，在策略改进幅度和稳定性之间取得平衡。</p>
+
+        <details>
+          <summary>展开完整推导 <span class="toggle-icon">▼</span></summary>
+          <div class="derivation">
+
+            <h5>1. 策略梯度定理</h5>
+            <p>对于参数化策略 $\pi_\theta$，目标 $J(\theta) = \mathbb{E}_\tau[\sum_t \gamma^t r_t]$ 的梯度为：</p>
+            <div class="math-block">$$\nabla_\theta J(\theta) = \mathbb{E}_{\pi_\theta}\!\left[\nabla_\theta\log\pi_\theta(a_t|s_t)\cdot A^{\pi_\theta}(s_t,a_t)\right]$$</div>
+            <p>梯度方向：若 $A_t > 0$（好动作），增大其概率；若 $A_t &lt; 0$（坏动作），减小其概率。</p>
+
+            <h5>2. 重要性采样（复用旧策略数据）</h5>
+            <p>直接用当前策略采样梯度是 on-policy 的，样本利用率低。
+            引入重要性权重，用旧策略 $\pi_{\theta_\text{old}}$ 的数据估计当前策略的梯度：</p>
+            <div class="math-block">
+              $$L^{\text{IS}}(\theta) = \mathbb{E}_t\!\left[\frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_\text{old}}(a_t|s_t)}\cdot A_t\right] = \mathbb{E}_t[r_t(\theta)\cdot A_t]$$
+            </div>
+            <p>其中概率比 $r_t(\theta) = \pi_\theta(a_t|s_t)/\pi_{\theta_\text{old}}(a_t|s_t)$。</p>
+
+            <h5>3. 问题：更新幅度过大</h5>
+            <p>直接最大化 $L^{\text{IS}}$ 可能使 $r_t$ 变得极大（若 $A_t > 0$，梯度会无限增大 $\pi_\theta$），
+            破坏策略的单调改进性质。TRPO 通过显式 KL 约束解决：</p>
+            <div class="math-block">
+              $$\max_\theta\,L^{\text{IS}}(\theta) \quad\text{s.t.}\quad\mathbb{E}_t[D_{\text{KL}}(\pi_{\theta_\text{old}}\|\pi_\theta)] \leq \delta$$
+            </div>
+            <p>但 TRPO 需要计算 Fisher 信息矩阵的逆，计算代价 $O(|\theta|^2)$，对大型神经网络不可行。</p>
+
+            <h5>4. PPO Clip：一阶近似</h5>
+            <p>PPO 直接截断概率比，无需计算二阶信息：</p>
+            <div class="math-block">
+              $$L^{\text{CLIP}}(\theta) = \mathbb{E}_t\!\left[\min\!\left(r_t A_t,\;\text{clip}(r_t,\,1{-}\epsilon,\,1{+}\epsilon)\,A_t\right)\right]$$
+            </div>
+            <p>几何意义（以 $\epsilon=0.2$ 为例）：</p>
+            <div class="step">
+              <div class="step-num">+</div>
+              <div class="step-body">当 $A_t > 0$（好动作）：$r_t$ 被限制在 $[-, 1.2]$，防止过度增大动作概率（当 $r_t > 1.2$ 时梯度为 0）。</div>
+            </div>
+            <div class="step">
+              <div class="step-num">−</div>
+              <div class="step-body">当 $A_t &lt; 0$（坏动作）：$r_t$ 被限制在 $[0.8, -]$，防止过度减小动作概率（当 $r_t &lt; 0.8$ 时梯度为 0）。</div>
+            </div>
+            <p>取 $\min$ 保证 $L^{\text{CLIP}}$ 是原始目标的<strong>悲观下界</strong>（pessimistic lower bound），
+            只在 Clip 未激活时才更新策略，天然避免了过大更新。</p>
+
+            <h5>5. 完整 PPO 目标（三项联合）</h5>
+            <div class="math-block">
+              $$L(\theta) = \mathbb{E}_t\!\left[L^{\text{CLIP}}_t - c_1\underbrace{(V_\theta(s_t)-V_t^\text{target})^2}_{\text{价值函数损失}} + c_2\underbrace{H[\pi_\theta(\cdot|s_t)]}_{\text{熵正则}}\right]$$
+            </div>
+            <p>熵正则项 $H$ 惩罚过于确定的策略，保持探索性；$c_1, c_2$ 通常取 0.5 和 0.01。</p>
+
+          </div>
+        </details>
       </div>
 
-      <!-- Frame Stacking -->
+      <!-- ⑥ Dueling DQN -->
       <div class="theory-card">
-        <h4>帧堆叠与 Markov 性质 <span class="tag">CNN DQN</span></h4>
+        <h4>⑥ Dueling 网络分解 <span class="tag">Dueling DQN</span></h4>
+        <div class="math-block">
+          $$Q(s,a) = V(s) + \left(A(s,a) - \frac{1}{|\mathcal{A}|}\sum_{a'}A(s,a')\right)$$
+        </div>
+        <p>将 Q 值分解为状态价值 $V(s)$ 和优势函数 $A(s,a)$，让网络在不需要选动作的状态上也能高效学习。</p>
+
+        <details>
+          <summary>展开完整推导 <span class="toggle-icon">▼</span></summary>
+          <div class="derivation">
+
+            <h5>1. 分解的动机</h5>
+            <p>在很多状态下，具体选哪个动作对价值影响不大——例如飞船在平稳飞行时，左右引擎的差别很小。
+            传统 DQN 要对每个动作都计算 Q 值，即使在这些状态下也要通过动作反向传播才能更新 $V(s)$ 的估计。</p>
+            <p>Dueling 架构直接把 $V(s)$ 和 $A(s,a)$ 用两条独立的子网络学习，$V(s)$ 可以从任意动作的经验中更新，学习信号更充分。</p>
+
+            <h5>2. 优势函数的定义</h5>
+            <div class="math-block">
+              $$A^\pi(s,a) = Q^\pi(s,a) - V^\pi(s)$$
+            </div>
+            <p>$A(s,a)$ 衡量动作 $a$ 相对于策略均值的相对优劣。最优策略下：$\max_a A^*(s,a) = 0$（最优动作的优势为零）。</p>
+
+            <h5>3. 不可识别性问题（Identifiability）</h5>
+            <p>若直接用 $Q = V + A$，给定相同的 Q 值，$V$ 和 $A$ 有无穷多种分解：</p>
+            <div class="math-block">
+              $$Q(s,a) = \underbrace{(V(s) + c)}_{\tilde{V}} + \underbrace{(A(s,a) - c)}_{\tilde{A}} \quad \forall c$$
+            </div>
+            <p>网络无法确定应该把哪部分归入 $V$、哪部分归入 $A$，梯度方向混乱。</p>
+
+            <h5>4. 减均值消除不可识别性</h5>
+            <p>强制约束 $\sum_a A(s,a) = 0$，即令 $A$ 相对于均值中心化：</p>
+            <div class="math-block">
+              $$Q(s,a) = V(s) + \left(A(s,a) - \frac{1}{|\mathcal{A}|}\sum_{a'}A(s,a')\right)$$
+            </div>
+            <p>这样分解唯一，网络可以明确区分哪部分是状态价值、哪部分是动作优势。
+            （另一种方案是减最大值 $\max_{a'}A$，能保证 $\max_a Q = V$，理论更优雅，但工程上均值更稳定。）</p>
+
+            <h5>5. 实验效果</h5>
+            <p>在 LunarLander-v3 中，三代算法网络参数量完全相同（~65K 参数），差异纯粹来自架构：</p>
+            <div class="math-block">
+              $$\text{DQN: }185.9 \to \text{Double DQN: }155.0 \to \textbf{Dueling DQN: }208.6$$
+            </div>
+            <p>Dueling 成为唯一解决该任务（均分 $\geq 200$）的架构，验证了 $V$/$A$ 分解在多目标稠密奖励任务中的优势。</p>
+
+          </div>
+        </details>
+      </div>
+
+      <!-- ⑦ 帧堆叠 -->
+      <div class="theory-card">
+        <h4>⑦ 帧堆叠与 Markov 性质 <span class="tag">CNN DQN / Pong</span></h4>
         <div class="math-block">
           $$s_t = (f_{t-3}, f_{t-2}, f_{t-1}, f_t) \in [0,1]^{4 \times 84 \times 84}$$
         </div>
-        <p>
-          单帧图像违反 MDP 的 Markov 性质——无法从静态像素感知球的运动方向。
-          将最近 $k=4$ 帧拼接后，连续帧的像素差异隐含了速度信息，
-          从而将 POMDP 近似恢复为 MDP。
-        </p>
+        <p>单帧图像违反 MDP 的 Markov 性质，帧堆叠通过像素差异隐式编码运动信息，将 POMDP 近似恢复为 MDP。</p>
+
+        <details>
+          <summary>展开完整推导 <span class="toggle-icon">▼</span></summary>
+          <div class="derivation">
+
+            <h5>1. Markov 性质的定义</h5>
+            <p>MDP 要求状态满足 Markov 性质：</p>
+            <div class="math-block">
+              $$P(s_{t+1}\mid s_t,a_t) = P(s_{t+1}\mid s_t, s_{t-1},\ldots, s_0,\,a_t,\ldots,a_0)$$
+            </div>
+            <p>即<strong>当前状态包含预测未来所需的全部信息</strong>，历史信息不提供额外帮助。</p>
+
+            <h5>2. 单帧图像违反 Markov 性质</h5>
+            <p>考虑 Pong 中一帧图像 $f_t$（球在屏幕中央）。这一帧可能对应两种完全不同的情况：</p>
+            <div class="step">
+              <div class="step-num">A</div>
+              <div class="step-body">球正在向右飞，最优动作是挡板向右移</div>
+            </div>
+            <div class="step">
+              <div class="step-num">B</div>
+              <div class="step-body">球正在向左飞，最优动作是挡板向左移</div>
+            </div>
+            <p>即 $P(s_{t+1}\mid f_t, a) \neq P(s_{t+1}\mid f_t, f_{t-1}, a)$，单帧状态不含速度信息，违反 Markov 性质。
+            此时环境实际上是<strong>部分可观测 MDP（POMDP）</strong>。</p>
+
+            <h5>3. 帧堆叠恢复 Markov 近似</h5>
+            <p>将最近 $k$ 帧拼接为状态：$s_t = (f_{t-k+1}, \ldots, f_t)$</p>
+            <p>连续两帧之间的像素差 $f_t - f_{t-1}$ 隐含了每个像素的运动方向和速度。
+            $k=4$ 帧能捕获球的位置、速度、加速度信息，对大多数 Atari 游戏足以近似满足 Markov 性质。</p>
+            <div class="math-block">
+              $$P(s_{t+1}\mid s_t, a_t) \approx P(s_{t+1}\mid s_t, s_{t-1},\ldots) \quad \text{（}k{=}4\text{ 时近似成立）}$$
+            </div>
+
+            <h5>4. 图像预处理管道</h5>
+            <p>原始 $(210, 160, 3)$ RGB 图像需要经过以下步骤才能作为网络输入：</p>
+            <div class="step">
+              <div class="step-num">1</div>
+              <div class="step-body"><strong>灰度化</strong>：颜色对 Pong 决策无关，去除 3 个颜色通道，减少参数量 3×</div>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-body"><strong>裁剪</strong>：去除上方比分栏（纯噪声），保留游戏区域</div>
+            </div>
+            <div class="step">
+              <div class="step-num">3</div>
+              <div class="step-body"><strong>缩放至 84×84</strong>：标准 Atari 尺寸，减少计算量</div>
+            </div>
+            <div class="step">
+              <div class="step-num">4</div>
+              <div class="step-body"><strong>归一化到 [0,1]</strong>：像素值除以 255，稳定梯度</div>
+            </div>
+            <div class="step">
+              <div class="step-num">5</div>
+              <div class="step-body"><strong>堆叠 4 帧</strong>：最终状态形状 $(4, 84, 84)$，通道维度编码时间</div>
+            </div>
+
+            <h5>5. CNN 网络结构（Mnih et al., 2015）</h5>
+            <div class="math-block">
+              $$(4,84,84) \xrightarrow{\text{Conv}(32,8,4)} (32,20,20) \xrightarrow{\text{Conv}(64,4,2)} (64,9,9) \xrightarrow{\text{Conv}(64,3,1)} (64,7,7)$$
+              $$\xrightarrow{\text{Flatten}} 3136 \xrightarrow{\text{FC}} 512 \xrightarrow{\text{FC}} Q \in \mathbb{R}^6$$
+            </div>
+            <p>总参数量约 1.7M。三层卷积逐层提取从边缘→纹理→运动模式的视觉特征，最终 FC 层映射到每个动作的 Q 值。</p>
+
+          </div>
+        </details>
       </div>
 
     </div>
