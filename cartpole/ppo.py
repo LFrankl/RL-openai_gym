@@ -37,6 +37,7 @@ ALPHA           = 3e-4      # Adam 学习率
 MAX_GRAD_NORM   = 0.5       # 梯度裁剪
 
 DEVICE = torch.device("cpu")
+# DEVICE = torch.device("mps")  # Mac M4 启用 GPU 加速（取消注释即可）
 
 
 # ── Actor-Critic 网络 ───────────────────────────────────

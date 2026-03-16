@@ -42,6 +42,7 @@ MIN_REPLAY      = 1_000
 BC_REG_COEF     = 1.0       # 强 BC 正则，牢牢锚定专家分布
 
 DEVICE = torch.device("cpu")
+# DEVICE = torch.device("mps")  # Mac M4 启用 GPU 加速（取消注释即可）
 
 
 class QNetwork(nn.Module):

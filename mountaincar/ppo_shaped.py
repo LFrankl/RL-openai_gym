@@ -36,6 +36,7 @@ MAX_GRAD_NORM = 0.5
 MAX_STEPS     = 300_000
 
 DEVICE = torch.device("cpu")
+# DEVICE = torch.device("mps")  # Mac M4 启用 GPU 加速（取消注释即可）
 
 
 def custom_reward(obs, next_obs, terminated):

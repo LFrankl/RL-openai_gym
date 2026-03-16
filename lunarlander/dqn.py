@@ -71,6 +71,7 @@ TARGET_UPDATE  = 10        # 每隔多少回合同步目标网络
 MIN_REPLAY     = 1_000     # 回放池至少积累多少条才开始训练
 
 DEVICE = torch.device("cpu")
+# DEVICE = torch.device("mps")  # Mac M4 启用 GPU 加速（取消注释即可）
 
 
 # ─────────────────────────────────────────────

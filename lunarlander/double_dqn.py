@@ -57,6 +57,7 @@ TARGET_UPDATE  = 10
 MIN_REPLAY     = 1_000
 
 DEVICE = torch.device("cpu")
+# DEVICE = torch.device("mps")  # Mac M4 启用 GPU 加速（取消注释即可）
 
 
 class QNetwork(nn.Module):
