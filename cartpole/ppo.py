@@ -202,8 +202,8 @@ def train():
 
 
 # ── 评估 ────────────────────────────────────────────────
-def evaluate(model: ActorCritic, episodes: int = 10):
-    env   = gym.make("CartPole-v1")
+def evaluate(model: ActorCritic, episodes: int = 10, render: bool = True):
+    env   = gym.make("CartPole-v1", render_mode="human" if render else None)
     total = 0
     model.eval()
     with torch.no_grad():

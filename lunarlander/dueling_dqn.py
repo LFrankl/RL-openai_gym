@@ -217,8 +217,8 @@ def train():
     return policy_net, rewards
 
 
-def evaluate(policy_net: DuelingQNetwork, episodes: int = 20):
-    env   = gym.make("LunarLander-v3")
+def evaluate(policy_net: DuelingQNetwork, episodes: int = 20, render: bool = True):
+    env   = gym.make("LunarLander-v3", render_mode="human" if render else None)
     total = 0
     policy_net.eval()
     with torch.no_grad():

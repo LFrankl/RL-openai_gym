@@ -201,8 +201,8 @@ def dqn_finetune(env, policy_net, replay, obs_t, act_t):
     return rewards
 
 
-def evaluate(policy_net, episodes=20):
-    env   = gym.make("MountainCar-v0")
+def evaluate(policy_net, episodes=20, render: bool = True):
+    env   = gym.make("MountainCar-v0", render_mode="human" if render else None)
     total = 0
     wins  = 0
     policy_net.eval()

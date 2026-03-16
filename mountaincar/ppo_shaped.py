@@ -167,8 +167,8 @@ def train():
     return model, ep_rewards
 
 
-def evaluate(model, episodes=20):
-    env   = gym.make("MountainCar-v0")
+def evaluate(model, episodes=20, render: bool = True):
+    env   = gym.make("MountainCar-v0", render_mode="human" if render else None)
     total = 0
     wins  = 0
     model.eval()

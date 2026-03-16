@@ -88,9 +88,9 @@ def train():
     return q_table, rewards
 
 
-def evaluate(q_table: np.ndarray, episodes: int = 10):
+def evaluate(q_table: np.ndarray, episodes: int = 10, render: bool = True):
     """用训练好的 Q-Table 跑评估（纯贪心）。"""
-    env = gym.make("CartPole-v1")
+    env = gym.make("CartPole-v1", render_mode="human" if render else None)
     total = 0
     for _ in range(episodes):
         obs, _ = env.reset()

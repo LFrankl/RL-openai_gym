@@ -220,9 +220,9 @@ def train():
 # ─────────────────────────────────────────────
 # 评估
 # ─────────────────────────────────────────────
-def evaluate(policy_net: QNetwork, episodes: int = 20):
+def evaluate(policy_net: QNetwork, episodes: int = 20, render: bool = True):
     """纯贪心策略跑评估，不做任何随机探索。"""
-    env   = gym.make("LunarLander-v3")
+    env   = gym.make("LunarLander-v3", render_mode="human" if render else None)
     total = 0
     policy_net.eval()
     with torch.no_grad():

@@ -147,8 +147,8 @@ def train():
 
 
 # ── 评估 ────────────────────────────────────────────────
-def evaluate(policy_net: QNetwork, episodes: int = 10):
-    env   = gym.make("CartPole-v1")
+def evaluate(policy_net: QNetwork, episodes: int = 10, render: bool = True):
+    env   = gym.make("CartPole-v1", render_mode="human" if render else None)
     total = 0
     policy_net.eval()
     for _ in range(episodes):

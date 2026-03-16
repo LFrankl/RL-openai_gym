@@ -93,8 +93,8 @@ def train():
     return q_table, rewards
 
 
-def evaluate(q_table, episodes=20):
-    env   = gym.make("MountainCar-v0")
+def evaluate(q_table, episodes=20, render: bool = True):
+    env   = gym.make("MountainCar-v0", render_mode="human" if render else None)
     total = 0
     wins  = 0
     for _ in range(episodes):
