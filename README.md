@@ -17,6 +17,11 @@ rl-gym/
 │   ├── ppo_shaped.py       # PPO + 多种奖励设计，仍失败
 │   ├── dqn_shaped.py       # 行为克隆预热，100% 到顶
 │   └── THEORY.md           # 8 次尝试的完整失败分析 + BC 理论
+├── lunarlander/
+│   ├── dqn.py              # 基础 DQN，引出 Q 值高估问题
+│   ├── double_dqn.py       # Double DQN，解耦动作选择与价值评估
+│   ├── dueling_dqn.py      # Dueling DQN，V(s)+A(s,a) 网络分解
+│   └── THEORY.md           # Q 值高估证明 + 三代算法演进理论
 ├── pyproject.toml
 ├── uv.lock
 └── .python-version
@@ -47,6 +52,20 @@ rl-gym/
 | **行为克隆（BC）** | **专家演示 + 监督学习** | **100%** | **-118** |
 
 > 详细的失败原因分析见 [mountaincar/THEORY.md](./mountaincar/THEORY.md)。
+
+## LunarLander-v3
+
+飞船从高空下落，目标是稳稳降落在着陆垫上。奖励**稠密但多目标**（位置、速度、角度、燃料同时优化），$\geq 200$ 分视为解决。
+
+三个算法网络参数量相同，差异纯粹来自算法设计：
+
+| 算法 | 改进点 | 评估均分 | 是否解决 |
+|------|--------|---------|---------|
+| DQN | 基准 | 185.9 | 未解决 |
+| Double DQN | 解耦选动作与评估价值，消除 Q 值高估 | 155.0 | 未解决 |
+| **Dueling DQN** | **V(s)+A(s,a) 分解，提升 V 的学习效率** | **208.6** | **已解决** |
+
+> 三代算法的演进理论见 [lunarlander/THEORY.md](./lunarlander/THEORY.md)。
 
 ## 快速上手
 
