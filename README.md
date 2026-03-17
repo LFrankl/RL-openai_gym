@@ -92,6 +92,29 @@ pong/
 └── THEORY.md    # 图像 MDP 理论 + 预处理必要性分析
 ```
 
+## BipedalWalker-v3
+
+双足机器人行走，**连续动作空间** $[-1,1]^4$（4 个关节力矩）。与前四个游戏的根本差异在于：DQN 的核心操作 $\arg\max_a Q(s,a)$ 在连续空间无解，必须切换算法范式。
+
+两个算法从不同角度解决连续控制问题：
+
+| 算法 | 策略类型 | 探索方式 | 核心思想 |
+|------|---------|---------|---------|
+| TD3 | 确定性 $\mu(s)$ | 外加高斯噪声 | 双Critic + 目标策略平滑 + 延迟更新 |
+| SAC | 随机 $\pi(a\|s)$ | 策略自带随机性 | 最大熵框架 + 重参数化 + 自动温度调节 |
+
+（评估结果待训练后填入）
+
+> 连续动作理论推导（DPG 定理、最大熵 Bellman 方程、重参数化技巧等）见 [bipedalwalker/THEORY.md](./bipedalwalker/THEORY.md)。
+
+```
+bipedalwalker/
+├── sac.py         # Soft Actor-Critic，最大熵随机策略
+├── td3.py         # Twin Delayed DDPG，确定性策略
+└── THEORY.md      # 连续动作空间理论分析
+```
+
 ## 快速上手
 
 参考 [DEPLOY.md](./DEPLOY.md)。
+

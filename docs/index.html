@@ -497,7 +497,7 @@
     <div class="hero-badge">Gymnasium · PyTorch · 强化学习</div>
     <h1>从零实现强化学习</h1>
     <p>
-      用 Gymnasium 环境逐游戏攻克经典 RL 问题——Q-Learning、DQN、PPO、CNN DQN，
+      用 Gymnasium 环境逐游戏攻克经典 RL 问题——Q-Learning、DQN、PPO、CNN DQN、SAC、TD3，
       完整保留所有失败实验与理论推导。
     </p>
     <div class="hero-actions">
@@ -509,11 +509,11 @@
 
     <div class="stats-grid" style="margin-top:60px;">
       <div class="stat-card">
-        <div class="stat-num" style="color:var(--accent)">4</div>
+        <div class="stat-num" style="color:var(--accent)">5</div>
         <div class="stat-label">Gymnasium 环境</div>
       </div>
       <div class="stat-card">
-        <div class="stat-num" style="color:var(--green)">9</div>
+        <div class="stat-num" style="color:var(--green)">11</div>
         <div class="stat-label">算法实现</div>
       </div>
       <div class="stat-card">
@@ -521,7 +521,7 @@
         <div class="stat-label">失败实验（保留）</div>
       </div>
       <div class="stat-card">
-        <div class="stat-num" style="color:var(--purple)">4</div>
+        <div class="stat-num" style="color:var(--purple)">5</div>
         <div class="stat-label">理论分析文档</div>
       </div>
     </div>
@@ -730,6 +730,46 @@
             <strong>核心洞察：</strong>单帧图像违反 Markov 性质——同一画面可能对应
             "球向左"或"球向右"两种完全不同的状态，最优动作相反。
             帧堆叠通过像素差异隐式编码运动信息，恢复 Markov 性质。
+          </div>
+        </div>
+      </div>
+
+      <!-- BipedalWalker -->
+      <div class="game-card">
+        <div class="game-header">
+          <div class="game-icon">🦿</div>
+          <div class="game-meta">
+            <h3>BipedalWalker-v3</h3>
+            <div class="flex-row" style="margin-top:6px;">
+              <span class="badge badge-purple">连续动作</span>
+              <span class="badge badge-yellow">控制</span>
+            </div>
+            <p class="game-desc" style="margin-top:6px;">
+              双足机器人行走，动作空间 $[-1,1]^4$（4 个关节力矩）。DQN 的 $\arg\max_a Q(s,a)$ 在连续空间无解，必须切换算法范式。
+            </p>
+          </div>
+        </div>
+        <div class="game-body">
+          <table class="algo-table">
+            <thead>
+              <tr><th>算法</th><th>策略类型</th><th>核心思想</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>TD3</td>
+                <td>确定性 $\mu(s)$</td>
+                <td>双Critic + 目标策略平滑 + 延迟更新</td>
+              </tr>
+              <tr>
+                <td>SAC</td>
+                <td>随机 $\pi(a|s)$</td>
+                <td>最大熵框架 + 重参数化 + 自动温度调节</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="game-insight">
+            <strong>范式跨越：</strong>连续控制是从离散 RL 到真实机器人控制的关键一步。
+            TD3 沿确定性策略梯度（DPG）路线，SAC 沿最大熵路线——两者解决同一问题的思路截然不同。
           </div>
         </div>
       </div>
@@ -1287,6 +1327,24 @@
           <td>图像像素</td>
           <td>Atari / 视觉输入</td>
         </tr>
+        <tr>
+          <td><strong>TD3</strong></td>
+          <td>确定性策略（直接）</td>
+          <td><strong>连续</strong></td>
+          <td><span class="badge badge-blue">中（off-policy）</span></td>
+          <td><span class="badge badge-red">无</span></td>
+          <td>连续向量</td>
+          <td>连续控制，需要稳定性</td>
+        </tr>
+        <tr>
+          <td><strong>SAC</strong></td>
+          <td>随机策略（直接）</td>
+          <td><strong>连续</strong></td>
+          <td><span class="badge badge-blue">中（off-policy）</span></td>
+          <td><span class="badge badge-red">无</span></td>
+          <td>连续向量</td>
+          <td>连续控制，超参数敏感度低</td>
+        </tr>
       </tbody>
     </table>
   </div>
@@ -1373,7 +1431,13 @@ uv run python lunarlander/dueling_dqn.py
 uv run python mountaincar/dqn_shaped.py
 
 # Pong CNN DQN（Atari 图像输入）
-uv run python pong/dqn_cnn.py</pre>
+uv run python pong/dqn_cnn.py
+
+# BipedalWalker SAC（连续动作，最大熵）
+uv run python bipedalwalker/sac.py
+
+# BipedalWalker TD3（连续动作，确定性策略）
+uv run python bipedalwalker/td3.py</pre>
       </div>
 
       <div class="step-card">
